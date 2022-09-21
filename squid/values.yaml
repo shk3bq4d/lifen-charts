@@ -25,6 +25,8 @@ service:
   port: 80
   # annotations: {}
 
+timezone: UTC
+
 ingress:
   enabled: false
   annotations: {}

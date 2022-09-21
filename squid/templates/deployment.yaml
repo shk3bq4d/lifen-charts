@@ -39,6 +39,11 @@ spec:
             subPath: squid.conf
           - name: cache
             mountPath: /var/cache/squid
+          - name: tz-config
+            mountPath: /etc/localtime
+          env:
+          - name: TZ
+            value: {{ .Values.timezone }}
           command:
             - /bin/sh
             - -c
@@ -56,12 +61,17 @@ spec:
           - name: http
             containerPort: 3128
             protocol: TCP
+          env:
+          - name: TZ
+            value: {{ .Values.timezone }}
           volumeMounts:
           - name: {{ template "squid.fullname" . }}-conf
             mountPath: /etc/squid/squid.conf
             subPath: squid.conf
           - name: cache
             mountPath: /var/cache/squid
+          - name: tz-config
+            mountPath: /etc/localtime
         {{- if .Values.configSecret }}
           - name: config-secret
             mountPath: /etc/squid/config
@@ -94,6 +104,12 @@ spec:
           - name: metrics
             containerPort: {{ .Values.metrics.exporter.port }}
             protocol: TCP
+          env:
+          - name: TZ
+            value: {{ .Values.timezone }}
+          volumeMounts:
+          - name: tz-config
+            mountPath: /etc/localtime
           livenessProbe:
             tcpSocket:
               port: {{ .Values.metrics.exporter.port }}
@@ -114,6 +130,10 @@ spec:
           name: {{ template "squid.fullname" . }}-conf
       - emptyDir: {}
         name: cache
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/{{ .Values.timezone }}
+          type: File
     {{- if .Values.configSecret }}
       - name: config-secret
         secret:
